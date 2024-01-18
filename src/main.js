@@ -6,7 +6,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import VueSmoothScroll from "vue3-smooth-scroll";
 import homepage from "./views/homepage.vue";
 import Schedule from "./components/Schedule.vue";
-
+import RecommenedFood from "./components/RecommenedFood.vue";
 // Import icon libraries
 import "@quasar/extras/material-icons/material-icons.css";
 
@@ -28,6 +28,7 @@ const router = createRouter({
   routes: [
     { path: "/", component: homepage },
     { path: "/schedule", component: Schedule },
+    { path: "/recommened-food", component: RecommenedFood },
   ],
 });
 

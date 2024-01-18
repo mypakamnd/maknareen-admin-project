@@ -11,6 +11,12 @@ import {
   orderBy,
 } from "firebase/firestore";
 import { ref, onMounted } from "vue";
+import {
+  getStorage,
+  uploadBytesResumable,
+  ref as storageRef,
+  getDownloadURL,
+} from "firebase/storage";
 
 const scheduleCollection = collection(db, "schedule");
 const queryScheduleCollcetion = query(
@@ -20,38 +26,23 @@ const queryScheduleCollcetion = query(
 const events = ref([]);
 const showEditForm = ref(false);
 
-onMounted(async () => {
-  onSnapshot(queryScheduleCollcetion, (querySnapshot) => {
-    const meenEvents = [];
-    querySnapshot.forEach((doc) => {
-      const meenEvent = {
-        id: doc.id,
-        eventDate: doc.data().eventDate,
-        eventDetail: doc.data().eventDetail,
-        eventImage: doc.data().eventImage,
-        eventLocation: doc.data().eventLocation,
-        eventName: doc.data().eventName,
-      };
-
-      meenEvents.push(meenEvent);
-    });
-    events.value = meenEvents;
-  });
-});
-
 const newEventName = ref("");
 const newEventDate = ref("");
 const newEventLocation = ref("");
 const newEventDetail = ref("");
-const newEventImage = ref("");
+const newEventImage = ref();
 
-const addEvent = () => {
+// Add Event Schedule
+const addEvent = async () => {
+  const fileRef = storageRef(storage, `/images/${newEventImage.value.name}`);
+  const upload = await uploadBytesResumable(fileRef, newEventImage.value);
+
   addDoc(scheduleCollection, {
     eventName: newEventName.value,
     eventDate: newEventDate.value,
     eventLocation: newEventLocation.value,
     eventDetail: newEventDetail.value,
-    eventImage: newEventImage.value,
+    eventImage: `/images/${newEventImage.value.name}`,
     dateAdd: Date.now(),
   });
   newEventName.value = "";
@@ -100,6 +91,48 @@ const updateEvent = (id) => {
   });
   showEditForm.value = false;
 };
+
+const storage = getStorage();
+
+function handleChange(e) {
+  const selectedFile = e.target.files[0];
+  newEventImage.value = selectedFile;
+  console.log("slected file successfully!");
+}
+
+onMounted(async () => {
+  onSnapshot(queryScheduleCollcetion, async (querySnapshot) => {
+    const promise = () => {
+      return new Promise((resolve) => {
+        const meenEvents = [];
+        let index = 0;
+        querySnapshot.forEach(async (doc) => {
+          const imageRef = storageRef(storage, `${doc.data().eventImage}`);
+          const url = await getDownloadURL(imageRef);
+          const event = {
+            id: doc.id,
+            eventDate: doc.data().eventDate,
+            eventDetail: doc.data().eventDetail,
+            eventImage: url,
+            eventLocation: doc.data().eventLocation,
+            eventName: doc.data().eventName,
+          };
+
+          index++;
+
+          meenEvents.push(event);
+          if (querySnapshot.size === index) {
+            console.log("meenEvents >>", meenEvents);
+            resolve(meenEvents);
+          }
+        });
+      });
+    };
+    const eventJa = await promise();
+    console.log("eventJa >>", eventJa);
+    events.value = eventJa;
+  });
+});
 </script>
 
 <template>
@@ -127,27 +160,22 @@ const updateEvent = (id) => {
           <label for="lname">Event Location</label>
           <input
             type="text"
-            id="lname"
-            name="lname"
             placeholder="Enter Event Location"
             v-model="newEventLocation"
           />
           <label for="lname">Event Link Detial</label>
           <input
             type="text"
-            id="lname"
-            name="lname"
             placeholder="Enter Event Link Detial"
             v-model="newEventDetail"
           />
-          <label for="lname">Event Link Image</label>
+          <!-- <label for="lname">Event Link Image</label>
           <input
             type="text"
-            id="lname"
-            name="lname"
             placeholder="Enter Event Link Image"
             v-model="newEventImage"
-          />
+          /> -->
+          <input type="file" @change="handleChange" />
         </form>
         <q-btn
           outline
