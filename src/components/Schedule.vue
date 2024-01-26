@@ -21,7 +21,7 @@ import {
 const scheduleCollection = collection(db, "schedule");
 const queryScheduleCollcetion = query(
   scheduleCollection,
-  orderBy("dateAdd", "asc")
+  orderBy("date", "desc")
 );
 const events = ref([]);
 const showEditForm = ref(false);
@@ -43,7 +43,7 @@ const addEvent = async () => {
     eventLocation: newEventLocation.value,
     eventDetail: newEventDetail.value,
     eventImage: `/images/${newEventImage.value.name}`,
-    dateAdd: Date.now(),
+    date: Date.now(),
   });
   newEventName.value = "";
   newEventDate.value = "";
@@ -166,15 +166,12 @@ onMounted(async () => {
           <label for="lname">Event Link Detial</label>
           <input
             type="text"
-            placeholder="Enter Event Link Detial"
+            placeholder="Enter Event DateTime"
             v-model="newEventDetail"
           />
           <!-- <label for="lname">Event Link Image</label>
-          <input
-            type="text"
-            placeholder="Enter Event Link Image"
-            v-model="newEventImage"
-          /> -->
+          <input type="datetime-local" v-model="newEventDateTime" />
+          <span>{{ newEventDateTime }}</span> -->
           <input type="file" @change="handleChange" />
         </form>
         <q-btn
@@ -316,6 +313,7 @@ onMounted(async () => {
 
 <style scoped>
 @import url("https://fonts.googleapis.com/css2?family=Quicksand&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai&display=swap");
 .event-schedule {
   display: flex;
   justify-content: center;
