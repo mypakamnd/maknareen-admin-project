@@ -9,6 +9,9 @@ import {
   updateDoc,
   query,
   orderBy,
+  serverTimestamp,
+  getDocs,
+  Timestamp,
 } from "firebase/firestore";
 import { ref, onMounted } from "vue";
 import {
@@ -19,10 +22,8 @@ import {
 } from "firebase/storage";
 
 const scheduleCollection = collection(db, "schedule");
-const queryScheduleCollcetion = query(
-  scheduleCollection,
-  orderBy("date", "desc")
-);
+const q = query(collection(db, "schedule"), orderBy("date", "asc"));
+
 const events = ref([]);
 const showEditForm = ref(false);
 
@@ -31,6 +32,7 @@ const newEventDate = ref("");
 const newEventLocation = ref("");
 const newEventDetail = ref("");
 const newEventImage = ref();
+const newDate = ref();
 
 // Add Event Schedule
 const addEvent = async () => {
@@ -43,13 +45,14 @@ const addEvent = async () => {
     eventLocation: newEventLocation.value,
     eventDetail: newEventDetail.value,
     eventImage: `/images/${newEventImage.value.name}`,
-    date: Date.now(),
+    date: Timestamp.fromDate(new Date(newDate.value)),
   });
   newEventName.value = "";
   newEventDate.value = "";
   newEventLocation.value = "";
   newEventDetail.value = "";
   newEventImage.value = "";
+  newDate.value = "";
 };
 
 const deleteEvent = (id) => {
@@ -101,37 +104,37 @@ function handleChange(e) {
 }
 
 onMounted(async () => {
-  onSnapshot(queryScheduleCollcetion, async (querySnapshot) => {
-    const promise = () => {
-      return new Promise((resolve) => {
-        const meenEvents = [];
-        let index = 0;
-        querySnapshot.forEach(async (doc) => {
-          const imageRef = storageRef(storage, `${doc.data().eventImage}`);
-          const url = await getDownloadURL(imageRef);
-          const event = {
-            id: doc.id,
-            eventDate: doc.data().eventDate,
-            eventDetail: doc.data().eventDetail,
-            eventImage: url,
-            eventLocation: doc.data().eventLocation,
-            eventName: doc.data().eventName,
-          };
-
-          index++;
-
-          meenEvents.push(event);
-          if (querySnapshot.size === index) {
-            console.log("meenEvents >>", meenEvents);
-            resolve(meenEvents);
-          }
-        });
-      });
-    };
-    const eventJa = await promise();
-    console.log("eventJa >>", eventJa);
-    events.value = eventJa;
+  const querySnapshot = await getDocs(q);
+  console.log(querySnapshot);
+  querySnapshot.forEach(async (doc) => {
+    console.log(doc.id, " => ", doc.data());
   });
+
+  const meenEvents = [];
+  for (const doc of querySnapshot.docs) {
+    // console.log("event.data >>", doc.data());
+
+    const imageRef = storageRef(storage, `${doc.data().eventImage}`);
+    const url = await getDownloadURL(imageRef);
+    const event = {
+      id: doc.id,
+      eventDate: doc.data().eventDate,
+      eventDetail: doc.data().eventDetail,
+      eventImage: url,
+      eventLocation: doc.data().eventLocation,
+      eventName: doc.data().eventName,
+      date: doc.data().date,
+    };
+
+    meenEvents.push(event);
+  }
+
+  events.value = meenEvents;
+  console.log("meenEvents >>", meenEvents);
+
+  const event = await promise();
+  console.log("event >>", event);
+  events.value = event;
 });
 </script>
 
@@ -169,9 +172,10 @@ onMounted(async () => {
             placeholder="Enter Event DateTime"
             v-model="newEventDetail"
           />
-          <!-- <label for="lname">Event Link Image</label>
-          <input type="datetime-local" v-model="newEventDateTime" />
-          <span>{{ newEventDateTime }}</span> -->
+          <label for="lname">Date</label>
+          <input type="date" v-model="newDate" />
+          {{ newDate }}
+
           <input type="file" @change="handleChange" />
         </form>
         <q-btn
