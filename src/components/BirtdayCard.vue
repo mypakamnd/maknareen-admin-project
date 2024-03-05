@@ -17,7 +17,6 @@ const cards = ref([]);
 
 onMounted(async () => {
   const querySnapshot = await getDocs(q);
-  console.log(querySnapshot);
   querySnapshot.forEach(async (doc) => {
     console.log(doc.id, " => ", doc.data());
   });
@@ -39,10 +38,8 @@ onMounted(async () => {
   }
 
   cards.value = BDcards;
-  console.log("BDcards >>", BDcards);
 
   const awit_BDCard = await promise();
-  console.log("awit_BDCard >>", awit_BDCard);
   cards.value = awit_BDCard;
 });
 

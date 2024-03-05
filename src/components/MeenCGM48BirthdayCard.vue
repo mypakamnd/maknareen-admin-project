@@ -1,13 +1,6 @@
 <script setup>
 import { db } from "../firebase/init.js";
-import {
-  collection,
-  updateDoc,
-  query,
-  orderBy,
-  getDocs,
-  doc,
-} from "firebase/firestore";
+import { collection, query, orderBy, getDocs } from "firebase/firestore";
 import { ref, onMounted } from "vue";
 
 const birthdayCardCollection = collection(db, "birthdayCard");
@@ -17,7 +10,6 @@ const cards = ref([]);
 
 onMounted(async () => {
   const querySnapshot = await getDocs(q);
-  console.log(querySnapshot);
   querySnapshot.forEach(async (doc) => {
     console.log(doc.id, " => ", doc.data());
   });
@@ -39,10 +31,8 @@ onMounted(async () => {
   }
 
   cards.value = BDcards;
-  console.log("BDcards >>", BDcards);
 
   const awit_BDCard = await promise();
-  console.log("awit_BDCard >>", awit_BDCard);
   cards.value = awit_BDCard;
 });
 </script>
