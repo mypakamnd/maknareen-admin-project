@@ -60,10 +60,6 @@ onMounted(async () => {
             <span class="recipe-title">ชื่อผู้ส่ง </span>
             <span class="recipe-value">{{ c.sender_name }}</span>
           </div>
-          <div class="recipe-flower">
-            <span class="recipe-title">adminApprove </span>
-            <span class="recipe-value">{{ c.adminApprove }}</span>
-          </div>
 
           <span class="recipe-shop-title"
             >----------------------------------</span
