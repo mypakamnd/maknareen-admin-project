@@ -8,6 +8,7 @@ import homepage from "./views/homepage.vue";
 import Schedule from "./components/Schedule.vue";
 import RecommenedFood from "./components/RecommenedFood.vue";
 import BirtdayCard from "./components/BirtdayCard.vue";
+import MeenCGM48BirthdayCard from "./components/MeenCGM48BirthdayCard.vue";
 // Import icon libraries
 import "@quasar/extras/material-icons/material-icons.css";
 
@@ -31,6 +32,7 @@ const router = createRouter({
     { path: "/schedule", component: Schedule },
     { path: "/recommened-food", component: RecommenedFood },
     { path: "/BirtdayCard", component: BirtdayCard },
+    { path: "/meencgm48-birthday-card", component: MeenCGM48BirthdayCard },
   ],
 });
 
